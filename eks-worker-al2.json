@@ -9,7 +9,8 @@
     "instance_type": "m4.large",
     "source_ami_id": "",
     "encrypted": "false",
-    "kms_key_id": ""
+    "kms_key_id": "",
+    "docker_ebs_name": "/dev/sdf"
   },
 
   "builders": [
@@ -34,6 +35,12 @@
           "device_name": "/dev/xvda",
           "volume_type": "gp2",
           "volume_size": 20,
+          "delete_on_termination": true
+        },
+        {
+          "device_name": "{{user `docker_ebs_name`}}",
+          "volume_type": "gp2",
+          "volume_size": 64,
           "delete_on_termination": true
         }
       ],
@@ -61,6 +68,14 @@
       "type": "file",
       "source": "./files/",
       "destination": "/tmp/worker/"
+    },
+    {
+      "type": "shell",
+      "script": "setup_docker_ebs.sh",
+      "environment_vars": [
+        "DOCKER_EBS_NAME={{user `docker_ebs_name`}}",
+        "FSTYPE=ext4"
+      ]
     },
     {
       "type": "shell",
